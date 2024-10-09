@@ -15,6 +15,60 @@ let signIn = true;
 document.body.addEventListener("click", (e) => {
   if (e.target.id != "switchForm") return;
 
+  switchAuthForm();
+});
+
+const authForm = document.querySelector("#authForm");
+
+authForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const user = {
+    username: signIn ? undefined : username.value,
+    email: email.value,
+    password: password.value,
+  };
+
+  if (signIn) {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const existingUser = users.find(
+      (user) => user.email === email.value && user.password === password.value
+    );
+
+    if (existingUser) {
+      localStorage.setItem("onlineUser", JSON.stringify(existingUser));
+      window.location.href = '../html/movies.html'
+    } else {
+      alert("Invalid Credentials");
+      return;
+    }
+  } else {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const existingUser = users.find(
+      (user) => user.username === username.value && user.email === email.value
+    );
+
+    if (existingUser) {
+      alert(`User ${existingUser.username} Already exists`);
+      return;
+    }
+    
+    if (confirmPassword.value !== password.value) {
+    alert("Password mismatch");
+    return;
+  }
+
+    users.push(user);
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Registered successfuly");
+    switchAuthForm();
+  }
+
+  
+});
+
+function switchAuthForm() {
   signIn = !signIn;
 
   if (!signIn) {
@@ -31,23 +85,9 @@ document.body.addEventListener("click", (e) => {
     confirmPassword.style.display = "none";
     username.value = "";
     confirmPassword.value = "";
+    email.value = "";
+    password.value = "";
 
     authSwitch.innerHTML = `Already have an account? <a href="#" id="switchForm">Sign in </a>`;
   }
-});
-
-const authForm = document.querySelector("#authForm");
-
-authForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const user = {
-    username: signIn ? undefined : username.value,
-    email: email.value,
-    password: password.value,
-  };
-
-  localStorage.setItem("users", JSON.stringify(user));
-  if (confirmPassword.value !== password.value) {
-    alert("Password mismatch");
-  }
-});
+}
